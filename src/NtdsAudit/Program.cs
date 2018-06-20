@@ -442,16 +442,21 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                     samAccountName = "SAM account name",
                     memberOf = "Member of",
                     userAccountControl = "User Account Control",
-                    username = "Username",
-                    administrator = "Administrator", 
+                    username = "User name",
+                    administrator = "Administrator",
                     domainAdmin = "Domain Admin",
                     enterpriseAdmin = "Enterprise Admin",
                     disabled = "Disabled",
                     expired = "Expired",
                     passwordNeverExpires = "Password Never Expires",
                     passwordNotRequired = "Password Not Required",
-                    passwordLastChanged = "Password Last Changed",
-                    lastLogon = "Last Logon"
+                    passwordLastSet = "Password last set",
+                    accountExpires = "Account expires",
+                    lastLogon = "Last logon", 
+                    lastLogonTimestamp = "Last logon timestamp",
+                    whenCreated = "When created",
+                    whenChanged = "When changed",
+
                 };
                 file.WriteLine(ToCsvRow(headerRow));
                 foreach (var user in ntdsAudit.Users)
@@ -480,7 +485,11 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                             passwordNeverExpires = user.PasswordNeverExpires,
                             passwordNotRequired = user.PasswordNotRequired,
                             passwordLastChanged = user.PasswordLastChanged,
-                            lastLogon = user.LastLogon
+                            accountExpires = user.Expires,
+                            lastLogon = user.LastLogon,
+                            lastLogonTimestamp = user.LastLogon.ToFileTime(),
+                            whenCreated = "---",
+                            whenChanged = "---"
                         });
                         file.WriteLine(csvRow);
                     }
@@ -491,7 +500,7 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                         var csvRow = ToCsvRow(new
                         {
                             domainFqdn = domain.Fqdn,
-                            guid = user.Sid, 
+                            guid = user.Sid,
                             recordId = user.Rid,
                             samAccountName = user.SamAccountName,
                             memberOf = groupName,
@@ -505,7 +514,11 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                             passwordNeverExpires = user.PasswordNeverExpires,
                             passwordNotRequired = user.PasswordNotRequired,
                             passwordLastChanged = user.PasswordLastChanged,
-                            lastLogon = user.LastLogon
+                            accountExpires = user.Expires,
+                            lastLogon = user.LastLogon,
+                            lastLogonTimestamp = user.LastLogon.ToFileTime(),
+                            whenCreated = "---",
+                            whenChanged = "---"
                         });
                         file.WriteLine(csvRow);
                     }
@@ -530,8 +543,8 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                     retval += $"{delimiter}";
                 }
 
-                var value = propertyInfo.GetValue(obj).ToString().Replace(quote, $"\\{quote}");
-                retval += $"{quote}{propertyInfo.GetValue(obj)}{quote}";
+                var value = propertyInfo.GetValue(obj)?.ToString()?.Replace(quote, $"\\{quote}");
+                retval += $"{quote}{value}{quote}";
             }
 
             return retval;

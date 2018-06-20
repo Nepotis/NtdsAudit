@@ -900,7 +900,7 @@
                     var aFlag = (ADS_USER_FLAG) value;
                     if (enumAdsUserFlag.HasFlag(aFlag))
                     {
-                        var suffix = name?.Substring(6);
+                        var suffix = name?.Substring(7);
                         if (!String.IsNullOrEmpty(suffix))
                         {
                             retval += $"{suffix}|";

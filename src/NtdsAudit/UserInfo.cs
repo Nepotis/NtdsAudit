@@ -95,6 +95,11 @@
         /// </summary>
         internal SecurityIdentifier[] RecursiveGroupSids { get; set; }
 
+
+        internal GroupInfo[] RecursiveGroups { get; set; }
+
+        internal int? UserAccountControl { get; set; }
+
         /// <summary>
         /// Gets or sets the Relative ID.
         /// </summary>
@@ -104,5 +109,7 @@
         /// Gets or sets the sam account name.
         /// </summary>
         internal string SamAccountName { get; set; }
+
+        public string UserAccountControlString { get; set; }
     }
 }

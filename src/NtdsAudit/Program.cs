@@ -219,11 +219,11 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
         {
             using (var file = new StreamWriter(computersCsvPath, false))
             {
-                file.WriteLine("Domain,Computer,Disabled,Last Logon");
+                file.WriteLine("Domain,GUID,Record ID,Computer,Disabled,Last Logon");
                 foreach (var computer in ntdsAudit.Computers)
                 {
                     var domain = ntdsAudit.Domains.Single(x => x.Sid == computer.DomainSid);
-                    file.WriteLine($"{domain.Fqdn},{computer.Name},{computer.Disabled},{computer.LastLogon}");
+                    file.WriteLine($"{domain.Fqdn},{computer.DomainSid.Value},{computer.Dn},{computer.Name},{computer.Disabled},{computer.LastLogon}");
                 }
             }
         }
@@ -349,11 +349,24 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
         {
             using (var file = new StreamWriter(usersCsvPath, false))
             {
-                file.WriteLine("Domain,Username,Administrator,Domain Admin,Enterprise Admin,Disabled,Expired,Password Never Expires,Password Not Required,Password Last Changed,Last Logon");
+                file.WriteLine("Domain,GUID,Record ID,SAM account name,Member of,User Account Control,Username,Administrator,Domain Admin,Enterprise Admin,Disabled,Expired,Password Never Expires,Password Not Required,Password Last Changed,Last Logon");
                 foreach (var user in ntdsAudit.Users)
                 {
                     var domain = ntdsAudit.Domains.Single(x => x.Sid == user.DomainSid);
-                    file.WriteLine($"{domain.Fqdn},{user.SamAccountName},{user.RecursiveGroupSids.Contains(domain.AdministratorsSid)},{user.RecursiveGroupSids.Contains(domain.DomainAdminsSid)},{user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()},{user.Disabled},{!user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime},{user.PasswordNeverExpires},{user.PasswordNotRequired},{user.PasswordLastChanged},{user.LastLogon}");
+                    var guid = user.DomainSid.AccountDomainSid?.Value;
+                    var userAccountControl = user.UserAccountControlString;
+                    //groups
+                    foreach (var group in user.RecursiveGroups)
+                    {
+                        var groupName = group.Name;
+                        file.WriteLine($"{domain.Fqdn},{guid},{user.Rid},{user.SamAccountName},{groupName},{userAccountControl},{user.SamAccountName},{user.RecursiveGroupSids.Contains(domain.AdministratorsSid)},{user.RecursiveGroupSids.Contains(domain.DomainAdminsSid)},{user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()},{user.Disabled},{!user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime},{user.PasswordNeverExpires},{user.PasswordNotRequired},{user.PasswordLastChanged},{user.LastLogon}");
+                    }
+
+                    if (user.RecursiveGroupSids.Length == 0)
+                    {
+                        var groupName = "";
+                        file.WriteLine($"{domain.Fqdn},{guid},{user.Rid},{user.SamAccountName},{groupName},{userAccountControl},{user.SamAccountName},{user.RecursiveGroupSids.Contains(domain.AdministratorsSid)},{user.RecursiveGroupSids.Contains(domain.DomainAdminsSid)},{user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()},{user.Disabled},{!user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime},{user.PasswordNeverExpires},{user.PasswordNotRequired},{user.PasswordLastChanged},{user.LastLogon}");
+                    }
                 }
             }
         }

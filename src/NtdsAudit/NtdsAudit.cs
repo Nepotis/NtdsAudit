@@ -782,6 +782,7 @@
             foreach (var user in Users)
             {
                 user.RecursiveGroupSids = Groups.Where(x => x.RecursiveMembersDnts.Contains(user.Dnt)).Select(x => x.Sid).ToArray();
+                user.RecursiveGroups = Groups.Where(x => x.RecursiveMembersDnts.Contains(user.Dnt)).ToArray();
             }
 
             if (ShowDebugOutput)
@@ -885,6 +886,26 @@
             return groups.ToArray();
         }
 
+        private string ComputeUserAccountControlString(int? flag)
+        {
+            string retval = String.Empty;
+            if (flag != null)
+            {
+                var enumAdsUserFlag = (ADS_USER_FLAG) flag;
+                foreach (var value in Enum.GetValues(typeof(ADS_USER_FLAG)))
+                {
+                    var name = Enum.GetName(typeof(ADS_USER_FLAG), value);
+                    var aFlag = (ADS_USER_FLAG) value;
+                    if (enumAdsUserFlag.HasFlag(aFlag))
+                    {
+                        retval += $"{name}|";
+                    }
+                }
+            }
+
+            return retval;
+        }
+
         private UserInfo[] CalculateUserInfo()
         {
             Stopwatch stopwatch = null;
@@ -902,9 +923,12 @@
                 {
                     if (row.ObjectCategory.Equals("Person"))
                     {
+                        var userAccountControlString = ComputeUserAccountControlString(row.UserAccountControlValue);
                         var userInfo = new UserInfo
                         {
                             Dnt = row.Dnt.Value,
+                            UserAccountControl = row.UserAccountControlValue,
+                            UserAccountControlString = userAccountControlString,
                             Name = row.Name,
                             Dn = row.Dn,
                             DomainSid = row.Sid.AccountDomainSid,

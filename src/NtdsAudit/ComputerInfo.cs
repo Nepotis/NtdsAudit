@@ -34,5 +34,9 @@
         /// Gets or sets the name.
         /// </summary>
         internal string Name { get; set; }
+
+        public uint RecordId { get; set; }
+
+        public SecurityIdentifier Sid { get; set; }
     }
 }

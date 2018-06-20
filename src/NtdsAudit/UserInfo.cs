@@ -111,5 +111,7 @@
         internal string SamAccountName { get; set; }
 
         public string UserAccountControlString { get; set; }
+
+        public SecurityIdentifier Sid { get; set; }
     }
 }

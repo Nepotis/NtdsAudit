@@ -613,6 +613,8 @@
                     var computerInfo = new ComputerInfo
                     {
                         Name = row.Name,
+                        RecordId = row.Rid,
+                        Sid = row.Sid,
                         Dn = row.Dn,
                         DomainSid = row.Sid.AccountDomainSid,
                         Disabled = (row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE) == (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE,
@@ -898,7 +900,11 @@
                     var aFlag = (ADS_USER_FLAG) value;
                     if (enumAdsUserFlag.HasFlag(aFlag))
                     {
-                        retval += $"{name}|";
+                        var suffix = name?.Substring(6);
+                        if (!String.IsNullOrEmpty(suffix))
+                        {
+                            retval += $"{suffix}|";
+                        }
                     }
                 }
             }
@@ -940,6 +946,7 @@
                             PasswordLastChanged = row.LastPasswordChange ?? DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
                             SamAccountName = row.SamAccountName,
                             Rid = row.Rid,
+                            Sid = row.Sid,
                             LmHash = row.LmHash,
                             NtHash = row.NtHash,
                             LmHistory = row.LmHistory,

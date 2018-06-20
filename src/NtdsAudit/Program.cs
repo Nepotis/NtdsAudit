@@ -13,7 +13,8 @@
     /// </summary>
     internal static class Program
     {
-        private static double GetPercentage(int actual, int maximum) => Math.Round(((double)100 / maximum) * actual, 1);
+        private static double GetPercentage(int actual, int maximum) =>
+            Math.Round(((double) 100 / maximum) * actual, 1);
 
         [Conditional("DEBUG")]
         private static void LaunchDebugger()
@@ -37,19 +38,33 @@ WARNING: Use of the --pwdump option will result in decryption of password hashes
 Sensitive information will be stored in memory and on disk. Ensure the pwdump file is handled appropriately.",
             };
 
-            commandLineApplication.VersionOption("-v | --version", Assembly.GetEntryAssembly().GetName().Version.ToString());
+            commandLineApplication.VersionOption("-v | --version",
+                Assembly.GetEntryAssembly().GetName().Version.ToString());
 
             commandLineApplication.HelpOption("-h | --help");
 
-            var ntdsPath = commandLineApplication.Argument("NTDS file", "The path of the NTDS.dit database to be audited, required.", false);
-            var systemHivePath = commandLineApplication.Option("-s | --system <file>", "The path of the associated SYSTEM hive, required when using the pwdump option.", CommandOptionType.SingleValue);
-            var pwdumpPath = commandLineApplication.Option("-p | --pwdump <file>", "The path to output hashes in pwdump format.", CommandOptionType.SingleValue);
-            var usersCsvPath = commandLineApplication.Option("-u | --users-csv <file>", "The path to output user details in CSV format.", CommandOptionType.SingleValue);
-            var computersCsvPath = commandLineApplication.Option("-c | --computers-csv <file>", "The path to output computer details in CSV format.", CommandOptionType.SingleValue);
-            var includeHistoryHashes = commandLineApplication.Option("--history-hashes", "Include history hashes in the pdwump output.", CommandOptionType.NoValue);
-            var dumpReversiblePath = commandLineApplication.Option("--dump-reversible <file>", "The path to output clear text passwords, if reversible encryption is enabled.", CommandOptionType.SingleValue);
-            var wordlistPath = commandLineApplication.Option("--wordlist", "The path to a wordlist of weak passwords for basic hash cracking. Warning, using this option is slow, the use of a dedicated password cracker, such as 'john', is recommended instead.", CommandOptionType.SingleValue);
-            var baseDate = commandLineApplication.Option("--base-date <yyyyMMdd>", "Specifies a custom date to be used as the base date in statistics. The last modified date of the NTDS file is used by default.", CommandOptionType.SingleValue);
+            var ntdsPath = commandLineApplication.Argument("NTDS file",
+                "The path of the NTDS.dit database to be audited, required.", false);
+            var systemHivePath = commandLineApplication.Option("-s | --system <file>",
+                "The path of the associated SYSTEM hive, required when using the pwdump option.",
+                CommandOptionType.SingleValue);
+            var pwdumpPath = commandLineApplication.Option("-p | --pwdump <file>",
+                "The path to output hashes in pwdump format.", CommandOptionType.SingleValue);
+            var usersCsvPath = commandLineApplication.Option("-u | --users-csv <file>",
+                "The path to output user details in CSV format.", CommandOptionType.SingleValue);
+            var computersCsvPath = commandLineApplication.Option("-c | --computers-csv <file>",
+                "The path to output computer details in CSV format.", CommandOptionType.SingleValue);
+            var includeHistoryHashes = commandLineApplication.Option("--history-hashes",
+                "Include history hashes in the pdwump output.", CommandOptionType.NoValue);
+            var dumpReversiblePath = commandLineApplication.Option("--dump-reversible <file>",
+                "The path to output clear text passwords, if reversible encryption is enabled.",
+                CommandOptionType.SingleValue);
+            var wordlistPath = commandLineApplication.Option("--wordlist",
+                "The path to a wordlist of weak passwords for basic hash cracking. Warning, using this option is slow, the use of a dedicated password cracker, such as 'john', is recommended instead.",
+                CommandOptionType.SingleValue);
+            var baseDate = commandLineApplication.Option("--base-date <yyyyMMdd>",
+                "Specifies a custom date to be used as the base date in statistics. The last modified date of the NTDS file is used by default.",
+                CommandOptionType.SingleValue);
             var debug = commandLineApplication.Option("--debug", "Show debug output.", CommandOptionType.NoValue);
 
             commandLineApplication.OnExecute(() =>
@@ -86,27 +101,37 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                     argumentsValid = false;
                 }
 
-                if (pwdumpPath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(pwdumpPath.Value())) && !Directory.Exists(Path.GetDirectoryName(pwdumpPath.Value())))
+                if (pwdumpPath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(pwdumpPath.Value())) &&
+                    !Directory.Exists(Path.GetDirectoryName(pwdumpPath.Value())))
                 {
-                    ConsoleEx.WriteError($"pwdump output directory \"{Path.GetDirectoryName(pwdumpPath.Value())}\" does not exist.");
+                    ConsoleEx.WriteError(
+                        $"pwdump output directory \"{Path.GetDirectoryName(pwdumpPath.Value())}\" does not exist.");
                     argumentsValid = false;
                 }
 
-                if (usersCsvPath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(usersCsvPath.Value())) && !Directory.Exists(Path.GetDirectoryName(usersCsvPath.Value())))
+                if (usersCsvPath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(usersCsvPath.Value())) &&
+                    !Directory.Exists(Path.GetDirectoryName(usersCsvPath.Value())))
                 {
-                    ConsoleEx.WriteError($"Users CSV output directory \"{Path.GetDirectoryName(usersCsvPath.Value())}\" does not exist.");
+                    ConsoleEx.WriteError(
+                        $"Users CSV output directory \"{Path.GetDirectoryName(usersCsvPath.Value())}\" does not exist.");
                     argumentsValid = false;
                 }
 
-                if (computersCsvPath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(computersCsvPath.Value())) && !Directory.Exists(Path.GetDirectoryName(computersCsvPath.Value())))
+                if (computersCsvPath.HasValue() &&
+                    !string.IsNullOrEmpty(Path.GetDirectoryName(computersCsvPath.Value())) &&
+                    !Directory.Exists(Path.GetDirectoryName(computersCsvPath.Value())))
                 {
-                    ConsoleEx.WriteError($"Computers CSV output directory \"{Path.GetDirectoryName(computersCsvPath.Value())}\" does not exist.");
+                    ConsoleEx.WriteError(
+                        $"Computers CSV output directory \"{Path.GetDirectoryName(computersCsvPath.Value())}\" does not exist.");
                     argumentsValid = false;
                 }
 
-                if (dumpReversiblePath.HasValue() && !string.IsNullOrEmpty(Path.GetDirectoryName(dumpReversiblePath.Value())) && !Directory.Exists(Path.GetDirectoryName(dumpReversiblePath.Value())))
+                if (dumpReversiblePath.HasValue() &&
+                    !string.IsNullOrEmpty(Path.GetDirectoryName(dumpReversiblePath.Value())) &&
+                    !Directory.Exists(Path.GetDirectoryName(dumpReversiblePath.Value())))
                 {
-                    ConsoleEx.WriteError($"Dump Reversible output directory \"{Path.GetDirectoryName(dumpReversiblePath.Value())}\" does not exist.");
+                    ConsoleEx.WriteError(
+                        $"Dump Reversible output directory \"{Path.GetDirectoryName(dumpReversiblePath.Value())}\" does not exist.");
                     argumentsValid = false;
                 }
 
@@ -123,15 +148,19 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
 
                 if (!showHelp && argumentsValid)
                 {
-                    var ntdsAudit = new NtdsAudit(ntdsPath.Value, pwdumpPath.HasValue(), includeHistoryHashes.HasValue(), systemHivePath.Value(), wordlistPath.Value());
+                    var ntdsAudit = new NtdsAudit(ntdsPath.Value, pwdumpPath.HasValue(),
+                        includeHistoryHashes.HasValue(), systemHivePath.Value(), wordlistPath.Value());
 
-                    var baseDateTime = baseDate.HasValue() ? DateTime.ParseExact(baseDate.Value(), "yyyyMMdd", null, DateTimeStyles.AssumeUniversal) : new FileInfo(ntdsPath.Value).LastWriteTimeUtc;
+                    var baseDateTime = baseDate.HasValue()
+                        ? DateTime.ParseExact(baseDate.Value(), "yyyyMMdd", null, DateTimeStyles.AssumeUniversal)
+                        : new FileInfo(ntdsPath.Value).LastWriteTimeUtc;
 
                     PrintConsoleStatistics(ntdsAudit, baseDateTime);
 
                     if (pwdumpPath.HasValue())
                     {
-                        WritePwDumpFile(pwdumpPath.Value(), ntdsAudit, baseDateTime, includeHistoryHashes.HasValue(), wordlistPath.HasValue(), dumpReversiblePath.Value());
+                        WritePwDumpFile(pwdumpPath.Value(), ntdsAudit, baseDateTime, includeHistoryHashes.HasValue(),
+                            wordlistPath.HasValue(), dumpReversiblePath.Value());
                     }
 
                     if (usersCsvPath.HasValue())
@@ -171,33 +200,50 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                 var users = ntdsAudit.Users.Where(x => x.DomainSid.Equals(domain.Sid)).ToList();
                 var totalUsersCount = users.Count;
                 var disabledUsersCount = users.Count(x => x.Disabled);
-                var expiredUsersCount = users.Count(x => !x.Disabled && x.Expires.HasValue && x.Expires.Value < baseDateTime);
-                var activeUsers = users.Where(x => !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime)).ToList();
+                var expiredUsersCount =
+                    users.Count(x => !x.Disabled && x.Expires.HasValue && x.Expires.Value < baseDateTime);
+                var activeUsers = users
+                    .Where(x => !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime)).ToList();
                 var activeUsersCount = activeUsers.Count;
-                var activeUsersUnusedIn1Year = activeUsers.Count(x => x.LastLogon + TimeSpan.FromDays(365) < baseDateTime);
-                var activeUsersUnusedIn90Days = activeUsers.Count(x => x.LastLogon + TimeSpan.FromDays(90) < baseDateTime);
+                var activeUsersUnusedIn1Year =
+                    activeUsers.Count(x => x.LastLogon + TimeSpan.FromDays(365) < baseDateTime);
+                var activeUsersUnusedIn90Days =
+                    activeUsers.Count(x => x.LastLogon + TimeSpan.FromDays(90) < baseDateTime);
                 var activeUsersWithPasswordNotRequired = activeUsers.Count(x => x.PasswordNotRequired);
                 var activeUsersWithPasswordNeverExpires = activeUsers.Count(x => !x.PasswordNeverExpires);
-                var activeUsersPasswordUnchangedIn1Year = activeUsers.Count(x => x.PasswordLastChanged + TimeSpan.FromDays(365) < baseDateTime);
-                var activeUsersPasswordUnchangedIn90Days = activeUsers.Count(x => x.PasswordLastChanged + TimeSpan.FromDays(90) < baseDateTime);
+                var activeUsersPasswordUnchangedIn1Year =
+                    activeUsers.Count(x => x.PasswordLastChanged + TimeSpan.FromDays(365) < baseDateTime);
+                var activeUsersPasswordUnchangedIn90Days =
+                    activeUsers.Count(x => x.PasswordLastChanged + TimeSpan.FromDays(90) < baseDateTime);
 
-                var activeUsersWithAdministratorMembership = activeUsers.Where(x => x.RecursiveGroupSids.Contains(domain.AdministratorsSid)).ToArray();
-                var activeUsersWithDomainAdminMembership = activeUsers.Where(x => x.RecursiveGroupSids.Contains(domain.DomainAdminsSid)).ToArray();
+                var activeUsersWithAdministratorMembership = activeUsers
+                    .Where(x => x.RecursiveGroupSids.Contains(domain.AdministratorsSid)).ToArray();
+                var activeUsersWithDomainAdminMembership =
+                    activeUsers.Where(x => x.RecursiveGroupSids.Contains(domain.DomainAdminsSid)).ToArray();
 
                 // Unlike Domain Admins and Adminsitrators, Enterprise Admins is not domain local, so include all users.
-                var activeUsersWithEnterpriseAdminMembership = ntdsAudit.Users.Where(x => !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime) && x.RecursiveGroupSids.Contains(domain.EnterpriseAdminsSid)).ToArray();
+                var activeUsersWithEnterpriseAdminMembership = ntdsAudit.Users.Where(x =>
+                    !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime) &&
+                    x.RecursiveGroupSids.Contains(domain.EnterpriseAdminsSid)).ToArray();
 
                 WriteStatistic("Disabled users", disabledUsersCount, totalUsersCount);
                 WriteStatistic("Expired users", expiredUsersCount, totalUsersCount);
                 WriteStatistic("Active users unused in 1 year", activeUsersUnusedIn1Year, activeUsersCount);
                 WriteStatistic("Active users unused in 90 days", activeUsersUnusedIn90Days, activeUsersCount);
-                WriteStatistic("Active users which do not require a password", activeUsersWithPasswordNotRequired, activeUsersCount);
-                WriteStatistic("Active users with non-expiring passwords", activeUsersWithPasswordNeverExpires, activeUsersCount);
-                WriteStatistic("Active users with password unchanged in 1 year", activeUsersPasswordUnchangedIn1Year, activeUsersCount);
-                WriteStatistic("Active users with password unchanged in 90 days", activeUsersPasswordUnchangedIn90Days, activeUsersCount);
-                WriteStatistic("Active users with Administrator rights", activeUsersWithAdministratorMembership.Length, activeUsersCount);
-                WriteStatistic("Active users with Domain Admin rights", activeUsersWithDomainAdminMembership.Length, activeUsersCount);
-                WriteStatistic("Active users with Enterprise Admin rights", activeUsersWithEnterpriseAdminMembership.Length, activeUsersCount);
+                WriteStatistic("Active users which do not require a password", activeUsersWithPasswordNotRequired,
+                    activeUsersCount);
+                WriteStatistic("Active users with non-expiring passwords", activeUsersWithPasswordNeverExpires,
+                    activeUsersCount);
+                WriteStatistic("Active users with password unchanged in 1 year", activeUsersPasswordUnchangedIn1Year,
+                    activeUsersCount);
+                WriteStatistic("Active users with password unchanged in 90 days", activeUsersPasswordUnchangedIn90Days,
+                    activeUsersCount);
+                WriteStatistic("Active users with Administrator rights", activeUsersWithAdministratorMembership.Length,
+                    activeUsersCount);
+                WriteStatistic("Active users with Domain Admin rights", activeUsersWithDomainAdminMembership.Length,
+                    activeUsersCount);
+                WriteStatistic("Active users with Enterprise Admin rights",
+                    activeUsersWithEnterpriseAdminMembership.Length, activeUsersCount);
                 Console.WriteLine();
 
                 var computers = ntdsAudit.Computers.Where(x => x.DomainSid.Equals(domain.Sid)).ToList();
@@ -205,12 +251,15 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                 var disabledComputersCount = computers.Count(x => x.Disabled);
                 var activeComputers = computers.Where(x => !x.Disabled).ToList();
                 var activeComputersCount = activeComputers.Count;
-                var activeComputersUnusedIn1Year = activeComputers.Count(x => x.LastLogon + TimeSpan.FromDays(365) < baseDateTime);
-                var activeComputersUnusedIn90Days = activeComputers.Count(x => x.LastLogon + TimeSpan.FromDays(90) < baseDateTime);
+                var activeComputersUnusedIn1Year =
+                    activeComputers.Count(x => x.LastLogon + TimeSpan.FromDays(365) < baseDateTime);
+                var activeComputersUnusedIn90Days =
+                    activeComputers.Count(x => x.LastLogon + TimeSpan.FromDays(90) < baseDateTime);
 
                 WriteStatistic("Disabled computers", disabledComputersCount, totalComputersCount);
                 WriteStatistic("Active computers unused in 1 year", activeComputersUnusedIn1Year, activeComputersCount);
-                WriteStatistic("Active computers unused in 90 days", activeComputersUnusedIn90Days, activeComputersCount);
+                WriteStatistic("Active computers unused in 90 days", activeComputersUnusedIn90Days,
+                    activeComputersCount);
                 Console.WriteLine();
             }
         }
@@ -219,29 +268,52 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
         {
             using (var file = new StreamWriter(computersCsvPath, false))
             {
-                file.WriteLine("Domain,GUID,Record ID,Computer,Disabled,Last Logon");
+                var headerRow = new
+                {
+                    domain = "Domain",
+                    guid = "GUID",
+                    recordId = "Record ID",
+                    computer = "Computer",
+                    disabled = "Disabled",
+                    lastLogon = "Last Logon"
+                };
+                file.WriteLine(ToCsvRow(headerRow));
                 foreach (var computer in ntdsAudit.Computers)
                 {
                     var domain = ntdsAudit.Domains.Single(x => x.Sid == computer.DomainSid);
-                    file.WriteLine($"{domain.Fqdn},{computer.DomainSid.Value},{computer.Dn},{computer.Name},{computer.Disabled},{computer.LastLogon}");
+                    var csvRow = new
+                    {
+                        domain = domain.Fqdn,
+                        guid = computer.Sid,
+                        recordId = computer.RecordId,
+                        computer = computer.Name,
+                        disabled = computer.Disabled,
+                        lastLogon = computer.LastLogon
+                    };
+
+                    file.WriteLine(ToCsvRow(csvRow));
                 }
             }
         }
 
-        private static void WritePwDumpFile(string pwdumpPath, NtdsAudit ntdsAudit, DateTime baseDateTime, bool includeHistoryHashes, bool wordlistInUse, string dumpReversiblePath)
+        private static void WritePwDumpFile(string pwdumpPath, NtdsAudit ntdsAudit, DateTime baseDateTime,
+            bool includeHistoryHashes, bool wordlistInUse, string dumpReversiblePath)
         {
             DomainInfo domain = null;
 
             // NTDS will only contain hashes for a single domain, even when NTDS was dumped from a global catalog server, ensure we only print hashes for that domain, and warn the user if there are other domains in NTDS
             if (ntdsAudit.Domains.Length > 1)
             {
-                var usersWithHashes = ntdsAudit.Users.Where(x => x.LmHash != NtdsAudit.EMPTY_LM_HASH || x.NtHash != NtdsAudit.EMPTY_NT_HASH).ToList();
+                var usersWithHashes = ntdsAudit.Users
+                    .Where(x => x.LmHash != NtdsAudit.EMPTY_LM_HASH || x.NtHash != NtdsAudit.EMPTY_NT_HASH).ToList();
                 domain = ntdsAudit.Domains.Single(x => x.Sid.Equals(usersWithHashes[0].DomainSid));
 
                 ConsoleEx.WriteWarning($"WARNING:");
-                ConsoleEx.WriteWarning($"The NTDS file has been retrieved from a global catalog (GC) server. Whilst GCs store information for other domains, they only store password hashes for their primary domain.");
+                ConsoleEx.WriteWarning(
+                    $"The NTDS file has been retrieved from a global catalog (GC) server. Whilst GCs store information for other domains, they only store password hashes for their primary domain.");
                 ConsoleEx.WriteWarning($"Password hashes have only been dumped for the \"{domain.Fqdn}\" domain.");
-                ConsoleEx.WriteWarning($"If you require password hashes for other domains, please obtain the NTDS and SYSTEM files for each domain.");
+                ConsoleEx.WriteWarning(
+                    $"If you require password hashes for other domains, please obtain the NTDS and SYSTEM files for each domain.");
                 Console.WriteLine();
             }
             else
@@ -254,23 +326,31 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
             if (users.Any(x => !string.IsNullOrEmpty(x.ClearTextPassword)))
             {
                 ConsoleEx.WriteWarning($"WARNING:");
-                ConsoleEx.WriteWarning($"The NTDS file contains user accounts with passwords stored using reversible encryption. Use the --dump-reversible option to output these users and passwords.");
+                ConsoleEx.WriteWarning(
+                    $"The NTDS file contains user accounts with passwords stored using reversible encryption. Use the --dump-reversible option to output these users and passwords.");
                 Console.WriteLine();
             }
 
-            var activeUsers = users.Where(x => !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime)).ToArray();
-            var activeUsersWithLMs = activeUsers.Where(x => !string.IsNullOrEmpty(x.LmHash) && x.LmHash != NtdsAudit.EMPTY_LM_HASH).ToArray();
+            var activeUsers = users.Where(x => !x.Disabled && (!x.Expires.HasValue || x.Expires.Value > baseDateTime))
+                .ToArray();
+            var activeUsersWithLMs = activeUsers
+                .Where(x => !string.IsNullOrEmpty(x.LmHash) && x.LmHash != NtdsAudit.EMPTY_LM_HASH).ToArray();
             var activeUsersWithWeakPasswords = activeUsers.Where(x => !string.IsNullOrEmpty(x.Password)).ToArray();
-            var activeUsersWithDuplicatePasswordsCount = activeUsers.Where(x => x.NtHash != NtdsAudit.EMPTY_NT_HASH).GroupBy(x => x.NtHash).Where(g => g.Count() > 1).Sum(g => g.Count());
-            var activeUsersWithPasswordStoredUsingReversibleEncryption = activeUsers.Where(x => !string.IsNullOrEmpty(x.ClearTextPassword)).ToArray();
+            var activeUsersWithDuplicatePasswordsCount = activeUsers.Where(x => x.NtHash != NtdsAudit.EMPTY_NT_HASH)
+                .GroupBy(x => x.NtHash).Where(g => g.Count() > 1).Sum(g => g.Count());
+            var activeUsersWithPasswordStoredUsingReversibleEncryption =
+                activeUsers.Where(x => !string.IsNullOrEmpty(x.ClearTextPassword)).ToArray();
 
             Console.WriteLine($"Password stats for: {domain.Fqdn}");
             WriteStatistic("Active users using LM hashing", activeUsersWithLMs.Length, activeUsers.Length);
-            WriteStatistic("Active users with duplicate passwords", activeUsersWithDuplicatePasswordsCount, activeUsers.Length);
-            WriteStatistic("Active users with password stored using reversible encryption", activeUsersWithPasswordStoredUsingReversibleEncryption.Length, activeUsers.Length);
+            WriteStatistic("Active users with duplicate passwords", activeUsersWithDuplicatePasswordsCount,
+                activeUsers.Length);
+            WriteStatistic("Active users with password stored using reversible encryption",
+                activeUsersWithPasswordStoredUsingReversibleEncryption.Length, activeUsers.Length);
             if (wordlistInUse)
             {
-                WriteStatistic("Active user accounts with very weak passwords", activeUsersWithWeakPasswords.Length, activeUsers.Length);
+                WriteStatistic("Active user accounts with very weak passwords", activeUsersWithWeakPasswords.Length,
+                    activeUsers.Length);
             }
 
             Console.WriteLine();
@@ -281,16 +361,17 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                 for (var i = 0; i < users.Length; i++)
                 {
                     var comments = $"Disabled={users[i].Disabled}," +
-                        $"Expired={!users[i].Disabled && users[i].Expires.HasValue && users[i].Expires.Value < baseDateTime}," +
-                        $"PasswordNeverExpires={users[i].PasswordNeverExpires}," +
-                        $"PasswordNotRequired={users[i].PasswordNotRequired}," +
-                        $"PasswordLastChanged={users[i].PasswordLastChanged.ToString("yyyyMMddHHmm")}," +
-                        $"LastLogonTimestamp={users[i].LastLogon.ToString("yyyyMMddHHmm")}," +
-                        $"IsAdministrator={users[i].RecursiveGroupSids.Contains(domain.AdministratorsSid)}," +
-                        $"IsDomainAdmin={users[i].RecursiveGroupSids.Contains(domain.DomainAdminsSid)}," +
-                        $"IsEnterpriseAdmin={users[i].RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()}";
+                                   $"Expired={!users[i].Disabled && users[i].Expires.HasValue && users[i].Expires.Value < baseDateTime}," +
+                                   $"PasswordNeverExpires={users[i].PasswordNeverExpires}," +
+                                   $"PasswordNotRequired={users[i].PasswordNotRequired}," +
+                                   $"PasswordLastChanged={users[i].PasswordLastChanged.ToString("yyyyMMddHHmm")}," +
+                                   $"LastLogonTimestamp={users[i].LastLogon.ToString("yyyyMMddHHmm")}," +
+                                   $"IsAdministrator={users[i].RecursiveGroupSids.Contains(domain.AdministratorsSid)}," +
+                                   $"IsDomainAdmin={users[i].RecursiveGroupSids.Contains(domain.DomainAdminsSid)}," +
+                                   $"IsEnterpriseAdmin={users[i].RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()}";
                     var homeDir = string.Empty;
-                    file.Write($"{domain.Fqdn}\\{users[i].SamAccountName}:{users[i].Rid}:{users[i].LmHash}:{users[i].NtHash}:{comments}:{homeDir}:");
+                    file.Write(
+                        $"{domain.Fqdn}\\{users[i].SamAccountName}:{users[i].Rid}:{users[i].LmHash}:{users[i].NtHash}:{comments}:{homeDir}:");
 
                     if (includeHistoryHashes && users[i].NtHistory != null && users[i].NtHistory.Length > 0)
                     {
@@ -305,8 +386,11 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                     {
                         for (var j = 0; j < users[i].NtHistory.Length; j++)
                         {
-                            var lmHash = (users[i].LmHistory?.Length > j) ? users[i].LmHistory[j] : NtdsAudit.EMPTY_LM_HASH;
-                            file.Write($"{domain.Fqdn}\\{users[i].SamAccountName}__history_{j}:{users[i].Rid}:{lmHash}:{users[i].NtHistory[j]}:::");
+                            var lmHash = (users[i].LmHistory?.Length > j)
+                                ? users[i].LmHistory[j]
+                                : NtdsAudit.EMPTY_LM_HASH;
+                            file.Write(
+                                $"{domain.Fqdn}\\{users[i].SamAccountName}__history_{j}:{users[i].Rid}:{lmHash}:{users[i].NtHistory[j]}:::");
 
                             if (j < users[i].NtHistory.Length || i < users.Length - 1)
                             {
@@ -317,7 +401,8 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                 }
             }
 
-            if (users.Any(x => !string.IsNullOrEmpty(x.ClearTextPassword)) && !string.IsNullOrWhiteSpace(dumpReversiblePath))
+            if (users.Any(x => !string.IsNullOrEmpty(x.ClearTextPassword)) &&
+                !string.IsNullOrWhiteSpace(dumpReversiblePath))
             {
                 using (var file = new StreamWriter(dumpReversiblePath, false))
                 {
@@ -349,7 +434,26 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
         {
             using (var file = new StreamWriter(usersCsvPath, false))
             {
-                file.WriteLine("Domain,GUID,Record ID,SAM account name,Member of,User Account Control,Username,Administrator,Domain Admin,Enterprise Admin,Disabled,Expired,Password Never Expires,Password Not Required,Password Last Changed,Last Logon");
+                var headerRow = new
+                {
+                    domain = "Domain",
+                    guid = "GUID",
+                    recordId = "Record ID",
+                    samAccountName = "SAM account name",
+                    memberOf = "Member of",
+                    userAccountControl = "User Account Control",
+                    username = "Username",
+                    administrator = "Administrator", 
+                    domainAdmin = "Domain Admin",
+                    enterpriseAdmin = "Enterprise Admin",
+                    disabled = "Disabled",
+                    expired = "Expired",
+                    passwordNeverExpires = "Password Never Expires",
+                    passwordNotRequired = "Password Not Required",
+                    passwordLastChanged = "Password Last Changed",
+                    lastLogon = "Last Logon"
+                };
+                file.WriteLine(ToCsvRow(headerRow));
                 foreach (var user in ntdsAudit.Users)
                 {
                     var domain = ntdsAudit.Domains.Single(x => x.Sid == user.DomainSid);
@@ -359,16 +463,78 @@ Sensitive information will be stored in memory and on disk. Ensure the pwdump fi
                     foreach (var group in user.RecursiveGroups)
                     {
                         var groupName = group.Name;
-                        file.WriteLine($"{domain.Fqdn},{guid},{user.Rid},{user.SamAccountName},{groupName},{userAccountControl},{user.SamAccountName},{user.RecursiveGroupSids.Contains(domain.AdministratorsSid)},{user.RecursiveGroupSids.Contains(domain.DomainAdminsSid)},{user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()},{user.Disabled},{!user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime},{user.PasswordNeverExpires},{user.PasswordNotRequired},{user.PasswordLastChanged},{user.LastLogon}");
+                        var csvRow = ToCsvRow(new
+                        {
+                            domainFqdn = domain.Fqdn,
+                            guid = user.Sid,
+                            recordId = user.Rid,
+                            samAccountName = user.SamAccountName,
+                            memberOf = groupName,
+                            userAccountControl = userAccountControl,
+                            username = user.SamAccountName,
+                            administrator = user.RecursiveGroupSids.Contains(domain.AdministratorsSid),
+                            domainAdmin = user.RecursiveGroupSids.Contains(domain.DomainAdminsSid),
+                            enterpriseAdmin = user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any(),
+                            disabled = user.Disabled,
+                            expired = !user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime,
+                            passwordNeverExpires = user.PasswordNeverExpires,
+                            passwordNotRequired = user.PasswordNotRequired,
+                            passwordLastChanged = user.PasswordLastChanged,
+                            lastLogon = user.LastLogon
+                        });
+                        file.WriteLine(csvRow);
                     }
 
                     if (user.RecursiveGroupSids.Length == 0)
                     {
                         var groupName = "";
-                        file.WriteLine($"{domain.Fqdn},{guid},{user.Rid},{user.SamAccountName},{groupName},{userAccountControl},{user.SamAccountName},{user.RecursiveGroupSids.Contains(domain.AdministratorsSid)},{user.RecursiveGroupSids.Contains(domain.DomainAdminsSid)},{user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any()},{user.Disabled},{!user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime},{user.PasswordNeverExpires},{user.PasswordNotRequired},{user.PasswordLastChanged},{user.LastLogon}");
+                        var csvRow = ToCsvRow(new
+                        {
+                            domainFqdn = domain.Fqdn,
+                            guid = user.Sid, 
+                            recordId = user.Rid,
+                            samAccountName = user.SamAccountName,
+                            memberOf = groupName,
+                            userAccountControl = userAccountControl,
+                            username = user.SamAccountName,
+                            administrator = user.RecursiveGroupSids.Contains(domain.AdministratorsSid),
+                            domainAdmin = user.RecursiveGroupSids.Contains(domain.DomainAdminsSid),
+                            enterpriseAdmin = user.RecursiveGroupSids.Intersect(ntdsAudit.Domains.Select(x => x.EnterpriseAdminsSid)).Any(),
+                            disabled = user.Disabled,
+                            expired = !user.Disabled && user.Expires.HasValue && user.Expires.Value < baseDateTime,
+                            passwordNeverExpires = user.PasswordNeverExpires,
+                            passwordNotRequired = user.PasswordNotRequired,
+                            passwordLastChanged = user.PasswordLastChanged,
+                            lastLogon = user.LastLogon
+                        });
+                        file.WriteLine(csvRow);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Convert any shallow object into a CSV row
+        /// </summary>
+        /// <param name="obj">The object to convert to a CSV string</param>
+        /// <param name="delimiter">The field delimiter to use</param>
+        /// <param name="quote">The quote character to use</param>
+        /// <returns>string</returns>
+        private static string ToCsvRow(object obj, string delimiter = ";", string quote = "\"")
+        {
+            var retval = "";
+            foreach (PropertyInfo propertyInfo in obj.GetType().GetProperties())
+            {
+                if (!String.IsNullOrEmpty(retval))
+                {
+                    retval += $"{delimiter}";
+                }
+
+                var value = propertyInfo.GetValue(obj).ToString().Replace(quote, $"\\{quote}");
+                retval += $"{quote}{propertyInfo.GetValue(obj)}{quote}";
+            }
+
+            return retval;
         }
     }
 }

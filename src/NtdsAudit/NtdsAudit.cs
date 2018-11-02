@@ -33,7 +33,8 @@
         /// <param name="includeHistoryHashes">A value indicating whether to include history hashes</param>
         /// <param name="systemHivePath">The path to the System hive.</param>
         /// <param name="wordlistPath">The path to a wordlist for simple hash cracking.</param>
-        public NtdsAudit(string ntdsPath, bool dumphashes, bool includeHistoryHashes, string systemHivePath, string wordlistPath)
+        public NtdsAudit(string ntdsPath, bool dumphashes, bool includeHistoryHashes, string systemHivePath,
+            string wordlistPath)
         {
             ntdsPath = ntdsPath ?? throw new ArgumentNullException(nameof(ntdsPath));
 
@@ -50,25 +51,27 @@
                     _mSysObjects = EnumerateMSysObjects(db);
                     if (!ShowDebugOutput)
                     {
-                        progress.Report(8 / (double)100);
+                        progress.Report(8 / (double) 100);
                     }
 
                     _linkTable = EnumerateLinkTable(db);
                     if (!ShowDebugOutput)
                     {
-                        progress.Report(16 / (double)100);
+                        progress.Report(16 / (double) 100);
                     }
 
-                    _ldapDisplayNameToDatatableColumnNameDictionary = EnumerateDatatableTableLdapDisplayNames(db, _mSysObjects);
+                    _ldapDisplayNameToDatatableColumnNameDictionary =
+                        EnumerateDatatableTableLdapDisplayNames(db, _mSysObjects);
                     if (!ShowDebugOutput)
                     {
-                        progress.Report(24 / (double)100);
+                        progress.Report(24 / (double) 100);
                     }
 
-                    _datatable = EnumerateDatatableTable(db, _ldapDisplayNameToDatatableColumnNameDictionary, dumphashes, includeHistoryHashes);
+                    _datatable = EnumerateDatatableTable(db, _ldapDisplayNameToDatatableColumnNameDictionary,
+                        dumphashes, includeHistoryHashes);
                     if (!ShowDebugOutput)
                     {
-                        progress.Report(32 / (double)100);
+                        progress.Report(32 / (double) 100);
                     }
                 }
 
@@ -77,32 +80,32 @@
                     DecryptSecretData(systemHivePath, includeHistoryHashes);
                     if (!ShowDebugOutput)
                     {
-                        progress.Report(40 / (double)100);
+                        progress.Report(40 / (double) 100);
                     }
                 }
 
                 CalculateDnsForDatatableRows();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(48 / (double)100);
+                    progress.Report(48 / (double) 100);
                 }
 
                 CalculateObjectCategoryStringForDatableRows();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(56 / (double)100);
+                    progress.Report(56 / (double) 100);
                 }
 
                 Domains = CalculateDomainInfo();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(64 / (double)100);
+                    progress.Report(64 / (double) 100);
                 }
 
                 Users = CalculateUserInfo();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(72 / (double)100);
+                    progress.Report(72 / (double) 100);
                 }
 
                 if (dumphashes)
@@ -116,25 +119,25 @@
 
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(80 / (double)100);
+                    progress.Report(80 / (double) 100);
                 }
 
                 Groups = CalculateSecurityGroupInfo();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(88 / (double)100);
+                    progress.Report(88 / (double) 100);
                 }
 
                 Computers = CalculateComputerInfo();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(96 / (double)100);
+                    progress.Report(96 / (double) 100);
                 }
 
                 CalculateGroupMembership();
                 if (!ShowDebugOutput)
                 {
-                    progress.Report(100 / (double)100);
+                    progress.Report(100 / (double) 100);
                 }
             }
             finally
@@ -218,7 +221,9 @@
             return hex.Replace("-", string.Empty);
         }
 
-        private static DatatableRow[] EnumerateDatatableTable(JetDb db, IReadOnlyDictionary<string, string> ldapDisplayNameToDatatableColumnNameDictionary, bool dumpHashes, bool includeHistoryHashes)
+        private static DatatableRow[] EnumerateDatatableTable(JetDb db,
+            IReadOnlyDictionary<string, string> ldapDisplayNameToDatatableColumnNameDictionary, bool dumpHashes,
+            bool includeHistoryHashes)
         {
             Stopwatch stopwatch = null;
             if (ShowDebugOutput)
@@ -231,6 +236,7 @@
             var datatable = new List<DatatableRow>();
             var deletedCount = 0;
 
+
             using (var table = db.OpenJetDbTable(DATATABLE))
             {
                 // Get a dictionary mapping column names to column ids
@@ -240,29 +246,60 @@
                 table.MoveBeforeFirst();
                 while (table.TryMoveNext())
                 {
-                    var accountExpiresColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["accountExpires"]] };
-                    var displayNameColumn = new StringColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["displayName"]] };
-                    var distinguishedNameTagColumn = new Int32ColumnValue { Columnid = columnDictionary["DNT_col"] };
-                    var groupTypeColumn = new Int32ColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["groupType"]] };
-                    var isDeletedColumn = new Int32ColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["isDeleted"]] };
-                    var lastLogonColumn = new LdapDateTimeColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["lastLogonTimestamp"]] };
-                    var lmColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["dBCSPwd"]] };
-                    var lmHistoryColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["lmPwdHistory"]] };
-                    var nameColumn = new StringColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["name"]] };
-                    var ntColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["unicodePwd"]] };
-                    var ntHistoryColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["ntPwdHistory"]] };
-                    var objColumn = new BoolColumnValue { Columnid = columnDictionary["OBJ_col"] };
-                    var objectCategoryColumn = new Int32ColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["objectCategory"]] };
-                    var objectSidColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["objectSid"]] };
-                    var parentDistinguishedNameTagColumn = new Int32ColumnValue { Columnid = columnDictionary["PDNT_col"] };
-                    var passwordLastSetColumn = new LdapDateTimeColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["pwdLastSet"]] };
-                    var pekListColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["pekList"]] };
-                    var primaryGroupIdColumn = new Int32ColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["primaryGroupID"]] };
-                    var rdnTypeColumn = new Int32ColumnValue { Columnid = columnDictionary["RDNtyp_col"] }; // The RDNTyp_col holds the Attribute-ID for the attribute being used as the RDN, such as CN, OU, DC
-                    var samAccountNameColumn = new StringColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["sAMAccountName"]] };
-                    var timeColumn = new LdapDateTimeColumnValue { Columnid = columnDictionary["time_col"] };
-                    var userAccountControlColumn = new Int32ColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["userAccountControl"]] };
-                    var supplementalCredentialsColumn = new BytesColumnValue { Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["supplementalCredentials"]] };
+                    var accountExpiresColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["accountExpires"]]};
+                    var displayNameColumn = new StringColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["displayName"]]};
+                    var distinguishedNameTagColumn = new Int32ColumnValue {Columnid = columnDictionary["DNT_col"]};
+                    var groupTypeColumn = new Int32ColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["groupType"]]};
+                    var isDeletedColumn = new Int32ColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["isDeleted"]]};
+                    var lastLogonColumn = new LdapDateTimeColumnValue
+                    {
+                        Columnid = columnDictionary[
+                            ldapDisplayNameToDatatableColumnNameDictionary["lastLogonTimestamp"]]
+                    };
+                    var lmColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["dBCSPwd"]]};
+                    var lmHistoryColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["lmPwdHistory"]]};
+                    var nameColumn = new StringColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["name"]]};
+                    var ntColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["unicodePwd"]]};
+                    var ntHistoryColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["ntPwdHistory"]]};
+                    var objColumn = new BoolColumnValue {Columnid = columnDictionary["OBJ_col"]};
+                    var objectCategoryColumn = new Int32ColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["objectCategory"]]};
+                    var objectSidColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["objectSid"]]};
+                    var parentDistinguishedNameTagColumn = new Int32ColumnValue
+                        {Columnid = columnDictionary["PDNT_col"]};
+                    var passwordLastSetColumn = new LdapDateTimeColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["pwdLastSet"]]};
+                    var pekListColumn = new BytesColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["pekList"]]};
+                    var primaryGroupIdColumn = new Int32ColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["primaryGroupID"]]};
+                    var rdnTypeColumn = new Int32ColumnValue
+                    {
+                        Columnid = columnDictionary["RDNtyp_col"]
+                    }; // The RDNTyp_col holds the Attribute-ID for the attribute being used as the RDN, such as CN, OU, DC
+                    var samAccountNameColumn = new StringColumnValue
+                        {Columnid = columnDictionary[ldapDisplayNameToDatatableColumnNameDictionary["sAMAccountName"]]};
+                    var timeColumn = new LdapDateTimeColumnValue {Columnid = columnDictionary["time_col"]};
+                    var userAccountControlColumn = new Int32ColumnValue
+                    {
+                        Columnid = columnDictionary[
+                            ldapDisplayNameToDatatableColumnNameDictionary["userAccountControl"]]
+                    };
+                    var supplementalCredentialsColumn = new BytesColumnValue
+                    {
+                        Columnid = columnDictionary[
+                            ldapDisplayNameToDatatableColumnNameDictionary["supplementalCredentials"]]
+                    };
 
                     var columns = new List<ColumnValue>
                     {
@@ -320,7 +357,8 @@
                     if (objectSidColumn.Error == JET_wrn.Success)
                     {
                         var sidBytes = objectSidColumn.Value;
-                        var ridBytes = sidBytes.Skip(sidBytes.Length - sizeof(int)).Take(sizeof(int)).Reverse().ToArray();
+                        var ridBytes = sidBytes.Skip(sidBytes.Length - sizeof(int)).Take(sizeof(int)).Reverse()
+                            .ToArray();
                         sidBytes = sidBytes.Take(sidBytes.Length - sizeof(int)).Concat(ridBytes).ToArray();
                         rid = BitConverter.ToUInt32(ridBytes, 0);
                         sid = new SecurityIdentifier(sidBytes, 0);
@@ -398,7 +436,8 @@
             return datatable.ToArray();
         }
 
-        private static IReadOnlyDictionary<string, string> EnumerateDatatableTableLdapDisplayNames(JetDb db, MSysObjectsRow[] mSysObjects)
+        private static IReadOnlyDictionary<string, string> EnumerateDatatableTableLdapDisplayNames(JetDb db,
+            MSysObjectsRow[] mSysObjects)
         {
             Stopwatch stopwatch = null;
             if (ShowDebugOutput)
@@ -420,8 +459,8 @@
                 table.MoveBeforeFirst();
                 while (table.TryMoveNext())
                 {
-                    var ldapDisplayNameColumn = new StringColumnValue { Columnid = columnDictionary["ATTm131532"] };
-                    var attributeIdColumn = new Int32ColumnValue { Columnid = columnDictionary["ATTc131102"] };
+                    var ldapDisplayNameColumn = new StringColumnValue {Columnid = columnDictionary["ATTm131532"]};
+                    var attributeIdColumn = new Int32ColumnValue {Columnid = columnDictionary["ATTc131102"]};
                     table.RetrieveColumns(attributeIdColumn, ldapDisplayNameColumn);
 
                     if (attributeIdColumn.Value != null)
@@ -432,7 +471,8 @@
                         }
                         else
                         {
-                            ldapDisplayNameToColumnNameDictionary.Add(ldapDisplayNameColumn.Value, mSysObjects.First(x => x.AttributeId == attributeIdColumn.Value).ColumnName);
+                            ldapDisplayNameToColumnNameDictionary.Add(ldapDisplayNameColumn.Value,
+                                mSysObjects.First(x => x.AttributeId == attributeIdColumn.Value).ColumnName);
                         }
                     }
                 }
@@ -440,8 +480,10 @@
 
             if (ShowDebugOutput)
             {
-                ConsoleEx.WriteDebug($"  Failed to match {unmatchedCount} LDAP display names to datatable column names");
-                ConsoleEx.WriteDebug($"  Matched {ldapDisplayNameToColumnNameDictionary.Count} LDAP display names to datatable column names");
+                ConsoleEx.WriteDebug(
+                    $"  Failed to match {unmatchedCount} LDAP display names to datatable column names");
+                ConsoleEx.WriteDebug(
+                    $"  Matched {ldapDisplayNameToColumnNameDictionary.Count} LDAP display names to datatable column names");
 
                 stopwatch.Stop();
                 ConsoleEx.WriteDebug($"  Completed in {stopwatch.Elapsed}");
@@ -472,9 +514,9 @@
                 table.MoveBeforeFirst();
                 while (table.TryMoveNext())
                 {
-                    var linkDelTimeColumn = new DateTimeColumnValue { Columnid = columnDictionary["link_deltime"] };
-                    var linkDntColumn = new Int32ColumnValue { Columnid = columnDictionary["link_DNT"] };
-                    var backlinkDnt = new Int32ColumnValue { Columnid = columnDictionary["backlink_DNT"] };
+                    var linkDelTimeColumn = new DateTimeColumnValue {Columnid = columnDictionary["link_deltime"]};
+                    var linkDntColumn = new Int32ColumnValue {Columnid = columnDictionary["link_DNT"]};
+                    var backlinkDnt = new Int32ColumnValue {Columnid = columnDictionary["backlink_DNT"]};
                     table.RetrieveColumns(linkDelTimeColumn, linkDntColumn, backlinkDnt);
 
                     // Ignore deleted links
@@ -525,13 +567,15 @@
                 table.MoveBeforeFirst();
                 while (table.TryMoveNext())
                 {
-                    var nameColumn = new Utf8StringColumnValue { Columnid = columnDictionary["Name"] };
+                    var nameColumn = new Utf8StringColumnValue {Columnid = columnDictionary["Name"]};
                     table.RetrieveColumns(nameColumn);
                     if (nameColumn.Value.StartsWith("ATT", StringComparison.Ordinal))
                     {
                         mSysObjects.Add(new MSysObjectsRow
                         {
-                            AttributeId = int.Parse(Regex.Replace(nameColumn.Value, "[A-Za-z-]", string.Empty, RegexOptions.None), CultureInfo.InvariantCulture),
+                            AttributeId =
+                                int.Parse(Regex.Replace(nameColumn.Value, "[A-Za-z-]", string.Empty, RegexOptions.None),
+                                    CultureInfo.InvariantCulture),
                             ColumnName = nameColumn.Value,
                         });
                     }
@@ -617,8 +661,10 @@
                         Sid = row.Sid,
                         Dn = row.Dn,
                         DomainSid = row.Sid.AccountDomainSid,
-                        Disabled = (row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE) == (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE,
-                        LastLogon = row.LastLogon ?? DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
+                        Disabled = (row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE) ==
+                                   (int) ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE,
+                        LastLogon =
+                            row.LastLogon ?? DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
                     };
                     computers.Add(computerInfo);
                 }
@@ -643,9 +689,18 @@
                 stopwatch.Start();
             }
 
-            var commonNameAttrbiuteId = int.Parse(Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["cn"], "[A-Za-z-]", string.Empty, RegexOptions.None), CultureInfo.InvariantCulture);
-            var organizationalUnitAttrbiuteId = int.Parse(Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["ou"], "[A-Za-z-]", string.Empty, RegexOptions.None), CultureInfo.InvariantCulture);
-            var domainComponentAttrbiuteId = int.Parse(Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["dc"], "[A-Za-z-]", string.Empty, RegexOptions.None), CultureInfo.InvariantCulture);
+            var commonNameAttrbiuteId =
+                int.Parse(
+                    Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["cn"], "[A-Za-z-]", string.Empty,
+                        RegexOptions.None), CultureInfo.InvariantCulture);
+            var organizationalUnitAttrbiuteId =
+                int.Parse(
+                    Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["ou"], "[A-Za-z-]", string.Empty,
+                        RegexOptions.None), CultureInfo.InvariantCulture);
+            var domainComponentAttrbiuteId =
+                int.Parse(
+                    Regex.Replace(_ldapDisplayNameToDatatableColumnNameDictionary["dc"], "[A-Za-z-]", string.Empty,
+                        RegexOptions.None), CultureInfo.InvariantCulture);
 
             var attributeIdToDistinguishedNamePrefexDictionary = new Dictionary<int, string>
             {
@@ -660,10 +715,11 @@
             foreach (var row in _datatable)
             {
                 if (row.RdnType == commonNameAttrbiuteId
-                        || row.RdnType == organizationalUnitAttrbiuteId
-                        || row.RdnType == domainComponentAttrbiuteId)
+                    || row.RdnType == organizationalUnitAttrbiuteId
+                    || row.RdnType == domainComponentAttrbiuteId)
                 {
-                    dntToPartialDnDictionary[row.Dnt.Value] = attributeIdToDistinguishedNamePrefexDictionary[row.RdnType.Value] + row.Name;
+                    dntToPartialDnDictionary[row.Dnt.Value] =
+                        attributeIdToDistinguishedNamePrefexDictionary[row.RdnType.Value] + row.Name;
                     if (row.ParentDnt.Value != 0)
                     {
                         dntToPdntDictionary[row.Dnt.Value] = row.ParentDnt.Value;
@@ -687,8 +743,8 @@
             foreach (var row in _datatable)
             {
                 if (row.RdnType == commonNameAttrbiuteId
-                        || row.RdnType == organizationalUnitAttrbiuteId
-                        || row.RdnType == domainComponentAttrbiuteId)
+                    || row.RdnType == organizationalUnitAttrbiuteId
+                    || row.RdnType == domainComponentAttrbiuteId)
                 {
                     row.Dn = dntToDnDictionary[row.Dnt.Value];
                 }
@@ -722,9 +778,12 @@
                         Name = row.Name,
                         Dn = row.Dn,
                     };
-                    domainInfo.AdministratorsSid = new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, domainInfo.Sid);
-                    domainInfo.DomainAdminsSid = new SecurityIdentifier(WellKnownSidType.AccountDomainAdminsSid, domainInfo.Sid);
-                    domainInfo.EnterpriseAdminsSid = new SecurityIdentifier(WellKnownSidType.AccountEnterpriseAdminsSid, domainInfo.Sid);
+                    domainInfo.AdministratorsSid =
+                        new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, domainInfo.Sid);
+                    domainInfo.DomainAdminsSid =
+                        new SecurityIdentifier(WellKnownSidType.AccountDomainAdminsSid, domainInfo.Sid);
+                    domainInfo.EnterpriseAdminsSid =
+                        new SecurityIdentifier(WellKnownSidType.AccountEnterpriseAdminsSid, domainInfo.Sid);
                     domainInfo.Fqdn = domainInfo.Dn.Replace("DC=", ".").Replace(",", string.Empty).TrimStart('.');
 
                     domains.Add(domainInfo);
@@ -754,7 +813,8 @@
             var dntToObjectCategoryDictionary = _datatable.ToDictionary(x => x.Dnt, x => x.ObjectCategory);
 
             // Create dictionary mapping DNTs to a list of backlinks (members)
-            var linkDictionary = _linkTable.GroupBy(x => x.LinkDnt).ToDictionary(g => g.Key, g => g.Select(x => x.BacklinkDnt));
+            var linkDictionary = _linkTable.GroupBy(x => x.LinkDnt)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.BacklinkDnt));
 
             // Look over the groups using the above dictionaries to populate the group members DNTs
             foreach (var group in Groups)
@@ -767,7 +827,10 @@
                 else
                 {
                     group.MembersDnts = linkDictionary[group.Dnt]
-                        .Where(x => x != group.Dnt && (dntToObjectCategoryDictionary.ContainsKey(x) && (dntToObjectCategoryDictionary[x] == "Group" || dntToObjectCategoryDictionary[x] == "Builtin" || dntToObjectCategoryDictionary[x] == "Person")))
+                        .Where(x => x != group.Dnt && (dntToObjectCategoryDictionary.ContainsKey(x) &&
+                                                       (dntToObjectCategoryDictionary[x] == "Group" ||
+                                                        dntToObjectCategoryDictionary[x] == "Builtin" ||
+                                                        dntToObjectCategoryDictionary[x] == "Person")))
                         .ToArray();
                 }
             }
@@ -783,7 +846,8 @@
             // Loop over each user and add group sids
             foreach (var user in Users)
             {
-                user.RecursiveGroupSids = Groups.Where(x => x.RecursiveMembersDnts.Contains(user.Dnt)).Select(x => x.Sid).ToArray();
+                user.RecursiveGroupSids = Groups.Where(x => x.RecursiveMembersDnts.Contains(user.Dnt))
+                    .Select(x => x.Sid).ToArray();
                 user.RecursiveGroups = Groups.Where(x => x.RecursiveMembersDnts.Contains(user.Dnt)).ToArray();
             }
 
@@ -799,14 +863,16 @@
             Stopwatch stopwatch = null;
             if (ShowDebugOutput)
             {
-                ConsoleEx.WriteDebug($"Called: {nameof(NtdsAudit)}::{nameof(CalculateObjectCategoryStringForDatableRows)}");
+                ConsoleEx.WriteDebug(
+                    $"Called: {nameof(NtdsAudit)}::{nameof(CalculateObjectCategoryStringForDatableRows)}");
                 stopwatch = new Stopwatch();
                 stopwatch.Start();
             }
 
             var classSchemaRowDnt = _datatable.Single(x => x.Name.Equals("Class-Schema")).Dnt;
 
-            var objectCategoryDntToObjectCategoryStringDictionary = _datatable.Where(x => x.ObjectCategoryDnt == classSchemaRowDnt).ToDictionary(x => x.Dnt, x => x.Name);
+            var objectCategoryDntToObjectCategoryStringDictionary = _datatable
+                .Where(x => x.ObjectCategoryDnt == classSchemaRowDnt).ToDictionary(x => x.Dnt, x => x.Name);
 
             foreach (var row in _datatable)
             {
@@ -861,7 +927,8 @@
             {
                 if (row.ObjectCategory?.Equals("Group") ?? false)
                 {
-                    if ((row.GroupType & (uint)ADS_GROUP_TYPE_ENUM.ADS_GROUP_TYPE_SECURITY_ENABLED) == (uint)ADS_GROUP_TYPE_ENUM.ADS_GROUP_TYPE_SECURITY_ENABLED)
+                    if ((row.GroupType & (uint) ADS_GROUP_TYPE_ENUM.ADS_GROUP_TYPE_SECURITY_ENABLED) ==
+                        (uint) ADS_GROUP_TYPE_ENUM.ADS_GROUP_TYPE_SECURITY_ENABLED)
                     {
                         var groupInfo = new GroupInfo
                         {
@@ -923,11 +990,13 @@
             }
 
             var users = new List<UserInfo>();
+
             foreach (var row in _datatable)
             {
-                if ((row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT) == (int)ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT)
+                if ((row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT) ==
+                    (int) ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT)
                 {
-                    if (row.ObjectCategory.Equals("Person"))
+                    if (row?.ObjectCategory?.Equals("Person") ?? false)
                     {
                         var userAccountControlString = ComputeUserAccountControlString(row.UserAccountControlValue);
                         var userInfo = new UserInfo
@@ -938,12 +1007,20 @@
                             Name = row.Name,
                             Dn = row.Dn,
                             DomainSid = row.Sid.AccountDomainSid,
-                            Disabled = (row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE) == (int)ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE,
-                            LastLogon = row.LastLogon ?? DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
-                            PasswordNotRequired = (row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_PASSWD_NOTREQD) == (int)ADS_USER_FLAG.ADS_UF_PASSWD_NOTREQD,
-                            PasswordNeverExpires = (row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_DONT_EXPIRE_PASSWD) == (int)ADS_USER_FLAG.ADS_UF_DONT_EXPIRE_PASSWD,
+                            Disabled = (row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE) ==
+                                       (int) ADS_USER_FLAG.ADS_UF_ACCOUNTDISABLE,
+                            LastLogon = row.LastLogon ??
+                                        DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
+                            PasswordNotRequired =
+                                (row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_PASSWD_NOTREQD) ==
+                                (int) ADS_USER_FLAG.ADS_UF_PASSWD_NOTREQD,
+                            PasswordNeverExpires =
+                                (row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_DONT_EXPIRE_PASSWD) ==
+                                (int) ADS_USER_FLAG.ADS_UF_DONT_EXPIRE_PASSWD,
                             Expires = GetAccountExpiresDateTimeFromByteArray(row.AccountExpires),
-                            PasswordLastChanged = row.LastPasswordChange ?? DateTime.Parse("01.01.1601 00:00:00", CultureInfo.InvariantCulture),
+                            PasswordLastChanged = row.LastPasswordChange ??
+                                                  DateTime.Parse("01.01.1601 00:00:00",
+                                                      CultureInfo.InvariantCulture),
                             SamAccountName = row.SamAccountName,
                             Rid = row.Rid,
                             Sid = row.Sid,
@@ -951,12 +1028,16 @@
                             NtHash = row.NtHash,
                             LmHistory = row.LmHistory,
                             NtHistory = row.NtHistory,
-                            ClearTextPassword = row.SupplementalCredentials?.ContainsKey("Primary:CLEARTEXT") ?? false ? Encoding.Unicode.GetString(row.SupplementalCredentials["Primary:CLEARTEXT"]) : null
+                            ClearTextPassword =
+                                row.SupplementalCredentials?.ContainsKey("Primary:CLEARTEXT") ?? false
+                                    ? Encoding.Unicode.GetString(row.SupplementalCredentials["Primary:CLEARTEXT"])
+                                    : null
                         };
                         users.Add(userInfo);
                     }
                 }
             }
+
 
             if (ShowDebugOutput)
             {
@@ -1009,19 +1090,23 @@
 
             foreach (var row in _datatable)
             {
-                if ((row.UserAccountControlValue & (int)ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT) == (int)ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT)
+                if ((row.UserAccountControlValue & (int) ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT) ==
+                    (int) ADS_USER_FLAG.ADS_UF_NORMAL_ACCOUNT)
                 {
                     if (row.EncryptedLmHash != null)
                     {
                         try
                         {
-                            row.LmHash = ByteArrayToHexString(NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedLmHash, row.Rid));
+                            row.LmHash =
+                                ByteArrayToHexString(NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedLmHash,
+                                    row.Rid));
                         }
                         catch (Exception ex)
                         {
                             if (ShowDebugOutput)
                             {
-                                ConsoleEx.WriteDebug($"Failed to decrypt LM hash for '{row.SamAccountName}' with error: {ex.Message}");
+                                ConsoleEx.WriteDebug(
+                                    $"Failed to decrypt LM hash for '{row.SamAccountName}' with error: {ex.Message}");
                             }
 
                             row.LmHash = EMPTY_LM_HASH;
@@ -1036,13 +1121,16 @@
                     {
                         try
                         {
-                            row.NtHash = ByteArrayToHexString(NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedNtHash, row.Rid));
+                            row.NtHash =
+                                ByteArrayToHexString(NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedNtHash,
+                                    row.Rid));
                         }
                         catch (Exception ex)
                         {
                             if (ShowDebugOutput)
                             {
-                                ConsoleEx.WriteDebug($"Failed to decrypt NT hash for '{row.SamAccountName}' with error: {ex.Message}");
+                                ConsoleEx.WriteDebug(
+                                    $"Failed to decrypt NT hash for '{row.SamAccountName}' with error: {ex.Message}");
                             }
 
                             row.NtHash = EMPTY_LM_HASH;
@@ -1062,13 +1150,15 @@
                             var decryptedHashes = new byte[0];
                             try
                             {
-                                decryptedHashes = NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedLmHistory, row.Rid);
+                                decryptedHashes =
+                                    NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedLmHistory, row.Rid);
                             }
                             catch (Exception ex)
                             {
                                 if (ShowDebugOutput)
                                 {
-                                    ConsoleEx.WriteDebug($"Failed to decrypt LM history hashes for '{row.SamAccountName}' with error: {ex.Message}");
+                                    ConsoleEx.WriteDebug(
+                                        $"Failed to decrypt LM history hashes for '{row.SamAccountName}' with error: {ex.Message}");
                                 }
                             }
 
@@ -1096,13 +1186,15 @@
                             var decryptedHashes = new byte[0];
                             try
                             {
-                                decryptedHashes = NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedNtHistory, row.Rid);
+                                decryptedHashes =
+                                    NTCrypto.DecryptHashes(decryptedPekList, row.EncryptedNtHistory, row.Rid);
                             }
                             catch (Exception ex)
                             {
                                 if (ShowDebugOutput)
                                 {
-                                    ConsoleEx.WriteDebug($"Failed to decrypt LM history hashes for '{row.SamAccountName}' with error: {ex.Message}");
+                                    ConsoleEx.WriteDebug(
+                                        $"Failed to decrypt LM history hashes for '{row.SamAccountName}' with error: {ex.Message}");
                                 }
                             }
 
@@ -1120,13 +1212,16 @@
                     {
                         try
                         {
-                            row.SupplementalCredentials = NTCrypto.DecryptSupplementalCredentials(decryptedPekList, row.SupplementalCredentialsBlob);
+                            row.SupplementalCredentials =
+                                NTCrypto.DecryptSupplementalCredentials(decryptedPekList,
+                                    row.SupplementalCredentialsBlob);
                         }
                         catch (Exception ex)
                         {
                             if (ShowDebugOutput)
                             {
-                                ConsoleEx.WriteDebug($"Failed to decrypt supplemental credentials for '{row.SamAccountName}' with error: {ex.Message}");
+                                ConsoleEx.WriteDebug(
+                                    $"Failed to decrypt supplemental credentials for '{row.SamAccountName}' with error: {ex.Message}");
                             }
                         }
                     }
